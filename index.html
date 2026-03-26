@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>VOLKRO — Průzkum trhu</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #111;
+  --paper: #f5f3ef;
+  --cream: #ede9e2;
+  --gold: #b8963e;
+  --gold-bg: #fdf6e3;
+  --hot: #b83232;
+  --hot-bg: #fdf0f0;
+  --warm: #c07a10;
+  --warm-bg: #fef6ea;
+  --blue: #2463a8;
+  --border: #ddd8cf;
+  --text-muted: #888;
+  --radius: 4px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); font-size: 14px; }
+
+/* ═══ HEADER ═══ */
+header {
+  background: var(--ink);
+  color: #fff;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--gold);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.logo { font-family: 'Playfair Display', serif; font-size: 18px; letter-spacing: 6px; color: var(--gold); text-transform: uppercase; }
+.header-meta { font-size: 11px; color: #666; letter-spacing: 1px; text-align: right; }
+
+/* ═══ TABS ═══ */
+nav {
+  background: var(--cream);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0;
+  padding: 14px 20px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 500;
+  cursor: pointer;
+  color: #888;
+  border-bottom: 2px solid transparent;
+  transition: all 0.18s;
+  white-space: nowrap;
+  user-select: none;
+}
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--ink); border-bottom-color: var(--gold); font-weight: 600; }
+
+/* ═══ PAGES ═══ */
+.page { display: none; padding: 24px; animation: fadeUp 0.25s ease; }
+.page.active { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ═══ VZKAZY BANNER ═══ */
+.vzkaz-banner {
+  background: var(--gold-bg);
+  border: 1px solid var(--gold);
+  border-left: 4px solid var(--gold);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.vzkaz-banner:hover { background: #faefd2; }
+.vzkaz-banner-title {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.vzkaz-banner-sub { font-size: 12px; color: #888; }
+.vzkaz-badge {
+  background: var(--gold);
+  color: #fff;
+  border-radius: 50%;
+  width: 20px; height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ═══ SECTION HEADER ═══ */
+.sec-title { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 4px; }
+.sec-sub { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 24px; }
+
+/* ═══ KPI GRID ═══ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+@media (min-width: 600px) { .kpi-grid { grid-template-columns: repeat(6, 1fr); } }
+.kpi {
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 16px 12px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.kpi::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--border);
+}
+.kpi.kc-gold::before { background: var(--gold); }
+.kpi.kc-hot::before { background: var(--hot); }
+.kpi.kc-warm::before { background: var(--warm); }
+.kpi.kc-blue::before { background: var(--blue); }
+.kpi-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.kpi.kc-hot .kpi-val { color: var(--hot); }
+.kpi.kc-warm .kpi-val { color: var(--warm); }
+.kpi.kc-gold .kpi-val { color: var(--gold); }
+.kpi.kc-blue .kpi-val { color: var(--blue); }
+.kpi-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); line-height: 1.3; }
+
+/* ═══ CHARTS ═══ */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+@media (min-width: 700px) { .charts-grid { grid-template-columns: 1fr 1fr 1fr; } }
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 20px;
+}
+.card-title {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.bar-label { font-size: 11px; flex: 0 0 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-track { flex: 1; background: var(--cream); height: 7px; }
+.bar-fill { height: 100%; background: var(--ink); transition: width 1s ease; }
+.bar-num { font-size: 12px; font-weight: 600; min-width: 18px; text-align: right; }
+
+.pie-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.pie-row:last-child { border: none; }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.dot-green { background: #27ae60; }
+.dot-yellow { background: var(--warm); }
+.dot-red { background: var(--hot); }
+.pie-label { flex: 1; font-size: 12px; }
+.pie-val { font-weight: 700; font-size: 14px; }
+.pie-pct { font-size: 11px; color: var(--text-muted); margin-left: 3px; }
+
+/* Values strip */
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+@media (min-width: 600px) { .values-grid { grid-template-columns: repeat(4, 1fr); } }
+.val-tile {
+  background: var(--cream);
+  padding: 14px 12px;
+  text-align: center;
+}
+.val-tile-num { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; }
+.val-tile-label { font-size: 10px; color: #666; margin-top: 4px; line-height: 1.3; }
+
+/* Insight bar */
+.insight-bar {
+  background: var(--ink);
+  color: #fff;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media (min-width: 700px) { .insight-bar { grid-template-columns: 1fr 1fr 1fr; } }
+.ins-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+.ins-text { font-size: 13px; color: #bbb; line-height: 1.6; }
+.ins-text strong { color: #fff; }
+
+/* ═══ FILTER BAR ═══ */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.fbtn {
+  padding: 7px 16px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  border-radius: var(--radius);
+}
+.fbtn:hover { background: var(--cream); }
+.fbtn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* ═══ TABLE ═══ */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; background: #fff; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 700px; }
+thead tr { background: var(--ink); color: #fff; }
+th { padding: 12px 14px; text-align: left; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap; font-weight: 500; }
+td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafaf8; }
+.badge { display: inline-block; padding: 2px 8px; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; border-radius: 2px; }
+.b-hot { background: var(--hot-bg); color: var(--hot); }
+.b-warm { background: var(--warm-bg); color: var(--warm); }
+.b-no { background: #f0f0f0; color: #999; }
+.score-dot {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%; font-weight: 700; font-size: 11px;
+}
+.sd-hot { background: var(--hot); color: #fff; }
+.sd-warm { background: var(--warm); color: #fff; }
+.sd-no { background: #ccc; color: #fff; }
+.vzkaz-pill {
+  display: inline-block;
+  background: var(--gold-bg);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.email-link { color: var(--gold); text-decoration: none; border-bottom: 1px solid var(--gold-bg); }
+.email-link:hover { border-bottom-color: var(--gold); }
+
+/* ═══ HOT LEAD CARDS ═══ */
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 600px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px) { .cards-grid { grid-template-columns: repeat(3, 1fr); } }
+.lcard {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  padding: 24px;
+  position: relative;
+  transition: box-shadow 0.2s;
+}
+.lcard:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+.lcard.hot { border-left-color: var(--hot); }
+.lcard.warm { border-left-color: var(--warm); }
+.lcard-ghost-score {
+  position: absolute; top: 16px; right: 16px;
+  font-family: 'Playfair Display', serif;
+  font-size: 42px; font-weight: 700; opacity: 0.08; line-height: 1;
+}
+.lcard-seg { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: 10px; }
+.lcard-seg.hot { color: var(--hot); }
+.lcard-seg.warm { color: var(--warm); }
+.lcard-email { font-size: 14px; font-weight: 500; margin-bottom: 14px; }
+.lcard-rows { font-size: 12px; color: #555; line-height: 1.8; }
+.lcard-rows b { color: var(--ink); }
+.lcard-vzkaz {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--gold-bg);
+  border-left: 3px solid var(--gold);
+  font-size: 12px;
+  color: #555;
+  font-style: italic;
+  line-height: 1.5;
+}
+.lcard-action {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* ═══ VZKAZY PAGE ═══ */
+.vzkaz-cards { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 600px) { .vzkaz-cards { grid-template-columns: 1fr 1fr; } }
+.vzk-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 20px;
+}
+.vzk-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.vzk-text { font-size: 14px; line-height: 1.6; font-style: italic; color: #444; border-left: 3px solid var(--gold); padding-left: 14px; }
+.vzk-zajem { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+.vzk-zajem.ano { color: #27ae60; }
+.vzk-zajem.mozna { color: var(--warm); }
+.vzk-zajem.ne { color: var(--hot); }
+
+/* ═══ AUTOMATION INFO ═══ */
+.auto-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.auto-step {
+  display: flex;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+.auto-step:last-child { border: none; }
+.auto-num {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  background: var(--ink);
+  color: var(--gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
+.auto-body { flex: 1; }
+.auto-title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+.auto-desc { font-size: 12px; color: #666; line-height: 1.6; }
+.auto-tag {
+  display: inline-block;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  font-size: 10px;
+  padding: 2px 8px;
+  font-family: monospace;
+  margin-top: 4px;
+  border-radius: 2px;
+}
+
+/* Modal for vzkaz */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #fff;
+  max-width: 480px;
+  width: 100%;
+  padding: 28px;
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.modal-close {
+  position: absolute; top: 14px; right: 16px;
+  background: none; border: none; cursor: pointer;
+  font-size: 18px; color: #888; line-height: 1;
+}
+.modal-title { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 6px; }
+.modal-sub { font-size: 11px; color: #888; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px; }
+.modal-vzkaz-item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.modal-vzkaz-item:last-child { border: none; }
+.modal-vzkaz-meta { font-size: 11px; color: #888; margin-bottom: 6px; }
+.modal-vzkaz-text { font-size: 13px; line-height: 1.6; font-style: italic; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">VOLKRO</div>
+    <div style="font-size:10px;color:#555;letter-spacing:1px;margin-top:2px;">Průzkum trhu</div>
+  </div>
+  <div class="header-meta" id="headerMeta">Načítám data…</div>
+</header>
+
+<nav>
+  <div class="tab active" onclick="switchTab('dashboard',this)">📊 Dashboard</div>
+  <div class="tab" onclick="switchTab('tracker',this)">Všechny leady</div>
+  <div class="tab" onclick="switchTab('hot',this)">🔥 Horké leady</div>
+  <div class="tab" onclick="switchTab('vzkazyPage',this)" id="vzkazTab">💬 Vzkazy</div>
+  <div class="tab" onclick="switchTab('auto',this)">⚙️ Automatizace</div>
+</nav>
+
+<!-- ═══ VZKAZY MODAL ═══ -->
+<div class="modal-overlay" id="vzkazModal" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('vzkazModal').classList.remove('open')">✕</button>
+    <div class="modal-title">Osobní vzkazy</div>
+    <div class="modal-sub" id="modalSub"></div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="dashboard" class="page active">
+
+  <div id="vzkazBanner" style="display:none" class="vzkaz-banner" onclick="openVzkazModal()">
+    <div class="vzkaz-banner-title">
+      <span class="vzkaz-badge" id="vzkazCount">0</span>
+      Noví osobní vzkazy od respondentů
+    </div>
+    <div class="vzkaz-banner-sub">Klikni pro zobrazení → nebo přejdi na záložku Vzkazy</div>
+  </div>
+
+  <p class="sec-title">Přehled průzkumu</p>
+  <p class="sec-sub">Validace trhu · Kolín a okolí · 2026</p>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card-title">Zájem o službu</div>
+      <div id="zajemChart"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Největší bolesti respondentů</div>
+      <div id="problemsChart"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Ochota platit měsíčně</div>
+      <div id="cenaChart"></div>
+    </div>
+  </div>
+
+  <div class="sec-sub" style="margin-top:0;">Co zákazníci chtějí nejvíce</div>
+  <div class="values-grid" id="valuesGrid"></div>
+
+  <div class="insight-bar">
+    <div>
+      <div class="ins-label">Klíčový závěr</div>
+      <div class="ins-text" id="insZaver"></div>
+    </div>
+    <div>
+      <div class="ins-label">Pricing signál</div>
+      <div class="ins-text" id="insPricing"></div>
+    </div>
+    <div>
+      <div class="ins-label">Doporučení</div>
+      <div class="ins-text" id="insAkce"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TRACKER ═══ -->
+<div id="tracker" class="page">
+  <p class="sec-title">Všechny leady</p>
+  <p class="sec-sub" id="trackerSub"></p>
+  <div class="filter-bar">
+    <button class="fbtn active" onclick="filterTable('all',this)">Vše</button>
+    <button class="fbtn" onclick="filterTable('hot',this)">🔥 Horké</button>
+    <button class="fbtn" onclick="filterTable('warm',this)">⚡ Sledovat</button>
+    <button class="fbtn" onclick="filterTable('no',this)">✗ Nevhodné</button>
+    <button class="fbtn" onclick="filterTable('vzkaz',this)">💬 S vzkazem</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Datum</th>
+          <th>Typ</th>
+          <th>Zájem</th>
+          <th>Problémy</th>
+          <th>Cena</th>
+          <th>Email</th>
+          <th>Skóre</th>
+          <th>Segment</th>
+          <th>Akce</th>
+          <th>Vzkaz</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ HOT LEADS ═══ -->
+<div id="hot" class="page">
+  <p class="sec-title">Horké leady</p>
+  <p class="sec-sub">Připravené k okamžitému kontaktu</p>
+  <div class="cards-grid" id="hotGrid"></div>
+</div>
+
+<!-- ═══ VZKAZY ═══ -->
+<div id="vzkazyPage" class="page">
+  <p class="sec-title">Osobní vzkazy</p>
+  <p class="sec-sub" id="vzkazySub"></p>
+  <div class="vzkaz-cards" id="vzkazCards"></div>
+</div>
+
+<!-- ═══ AUTOMATIZACE ═══ -->
+<div id="auto" class="page">
+  <p class="sec-title">Jak automatizovat dashboard</p>
+  <p class="sec-sub">3 kroky od manuálního uploadu k live datům</p>
+
+  <div class="auto-card">
+    <div class="auto-step">
+      <div class="auto-num">1</div>
+      <div class="auto-body">
+        <div class="auto-title">Tally → Google Sheets (nativní napojení)</div>
+        <div class="auto-desc">
+          V Tally přejdi na <strong>Integrations → Google Sheets</strong> a vyber nebo vytvoř sheet. Každé odeslání formuláře se automaticky zapíše jako nový řádek — žádný webhook ani Make není potřeba pro základní sběr.
+        </div>
+        <span class="auto-tag">Tally → Integrations → Google Sheets</span>
+      </div>
+    </div>
+    <div class="auto-step">
+      <div class="auto-num">2</div>
+      <div class="auto-body">
+        <div class="auto-title">Google Sheets → AI scoring přes Make.com</div>
+        <div class="auto-desc">
+          Postav scénář v Make: <strong>trigger = nový řádek v Sheets</strong> → pošli data do Claude/GPT API → zapiš výsledek (skóre, segment, akce) zpět do Sheets do nových sloupců. Michal pak vidí vyhodnocený sheet v reálném čase.
+        </div>
+        <span class="auto-tag">Make: Google Sheets → HTTP → Google Sheets</span>
+      </div>
+    </div>
+    <div class="auto-step">
+      <div class="auto-num">3</div>
+      <div class="auto-body">
+        <div class="auto-title">Dashboard načítá data z Google Sheets (živě)</div>
+        <div class="auto-desc">
+          Nastav Google Sheet jako <strong>veřejně čitelný</strong> (Sdílet → Kdokoli se odkazem → Čtenář) a pak použij Google Sheets JSON API. Dashboard si data stáhne při každém otevření a automaticky vykreslí aktuální stav bez nutnosti uploadovat Excel.
+        </div>
+        <span class="auto-tag">https://sheets.googleapis.com/v4/spreadsheets/SHEET_ID/values/A:Z?key=API_KEY</span>
+      </div>
+    </div>
+    <div class="auto-step">
+      <div class="auto-num">+</div>
+      <div class="auto-body">
+        <div class="auto-title">Notifikace při novém vzkazu</div>
+        <div class="auto-desc">
+          V Make přidej podmínku: <strong>pokud sloupec "Vzkaz" není prázdný</strong> → odešli email na tebe + Michala s obsahem vzkazu a jménem respondenta. Alternativně Slack nebo WhatsApp přes Make modul.
+        </div>
+        <span class="auto-tag">Make: Filter → Email / Slack notify</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--cream);border:1px solid var(--border);padding:20px;font-size:12px;color:#666;line-height:1.8;">
+    <strong style="color:var(--ink);display:block;margin-bottom:8px;">Stav URL pro Michala (GitHub Pages)</strong>
+    Michal může otevřít dashboard kdykoliv přes tvůj GitHub Pages odkaz. Pokud nasadíš verzi s live Google Sheets načítáním, data se aktualizují automaticky — stačí reload stránky. Žádný přístup do Google Sheets nebo Excelu nepotřebuje.
+  </div>
+</div>
+
+<script>
+// ════ DATA ════
+const DATA = {"leads":[{"datum":"2026-03-20","typ":"Rodinný dům","zajem":"Ano, dává to smysl","problemy":"Údržba a opravy, Hlídání revizí a servisů, Bezpečnost (alarm, kamery)","hodnota":"Že nemusím nic řešit, Automatické hlídání (revize, servis)","cena":"5 000 – 10 000 Kč","email":"lukas.volf@icloud.com","vzkaz":"","score":11,"segment":"hot"},{"datum":"2026-03-20","typ":"Rodinný dům","zajem":"Možná","problemy":"Údržba a opravy, Hlídání revizí a servisů, Bezpečnost (alarm, kamery)","hodnota":"Jeden spolehlivý partner na vše, Rychlé řešení problémů","cena":"3 000-5 000 Kč","email":"info@designpack.eu","vzkaz":"","score":8,"segment":"hot"},{"datum":"2026-03-22","typ":"Rodinný dům","zajem":"Možná","problemy":"Údržba a opravy, Zahrada, Úklid / provoz domácnosti","hodnota":"Že nemusím nic řešit, Jeden spolehlivý partner na vše, Automatické hlídání (revize, servis), Rychlé řešení problémů","cena":"3 000-5 000 Kč","email":"","vzkaz":"","score":6,"segment":"warm"},{"datum":"2026-03-23","typ":"Rodinný dům","zajem":"Ano, dává to smysl","problemy":"Shánění spolehlivých řemeslníků, Hlídání revizí a servisů, Úklid / provoz domácnosti","hodnota":"Že nemusím nic řešit, Jeden spolehlivý partner na vše, Automatické hlídání (revize, servis), Přehled/report o stavu domu","cena":"do 3000 Kč","email":"","vzkaz":"","score":7,"segment":"warm"},{"datum":"2026-03-24","typ":"Rodinný dům","zajem":"Možná","problemy":"Údržba a opravy, Zahrada, Úklid / provoz domácnosti","hodnota":"Rychlé řešení problémů, Že nemusím nic řešit","cena":"3 000-5 000 Kč","email":"","vzkaz":"","score":6,"segment":"warm"},{"datum":"2026-03-24","typ":"Rodinný dům","zajem":"Ano, dává to smysl","problemy":"Hlídání revizí a servisů, Technické věci (topení, voda, technologie), Úklid / provoz domácnosti","hodnota":"Automatické hlídání (revize, servis), Přehled/report o stavu domu, Že nemusím nic řešit","cena":"do 3000 Kč","email":"","vzkaz":"Aleš","score":7,"segment":"warm"},{"datum":"2026-03-24","typ":"Rodinný dům","zajem":"Ne","problemy":"Nic zásadního","hodnota":"Rychlé řešení problémů","cena":"do 3000 Kč","email":"","vzkaz":"Pro movitou klientelu takove nabidky existuji. Pro bezne majitele tyto sluzby nabizi pojistovny a utilitnu spolecnosti za par 100vek. Takze nekde mezi tim by mohl byt prostor 🙂. Pavel","score":0,"segment":"no"},{"datum":"2026-03-24","typ":"Rodinný dům","zajem":"Ano, dává to smysl","problemy":"Údržba a opravy","hodnota":"Že nemusím nic řešit","cena":"3 000-5 000 Kč","email":"lukas.volf@icloud.com","vzkaz":"Test Lukáš","score":9,"segment":"hot"},{"datum":"2026-03-24","typ":"Byt","zajem":"Ano, dává to smysl","problemy":"Shánění spolehlivých řemeslníků, Hlídání revizí a servisů, Údržba a opravy","hodnota":"Automatické hlídání (revize, servis), Jeden spolehlivý partner na vše","cena":"3 000-5 000 Kč","email":"","vzkaz":"","score":6,"segment":"warm"},{"datum":"2026-03-24","typ":"Obojí","zajem":"Ano, dává to smysl","problemy":"Úklid / provoz domácnosti, Údržba a opravy","hodnota":"Jeden spolehlivý partner na vše","cena":"3 000-5 000 Kč","email":"","vzkaz":"Kuba","score":6,"segment":"warm"},{"datum":"2026-03-24","typ":"Obojí","zajem":"Možná","problemy":"Shánění spolehlivých řemeslníků, Úklid / provoz domácnosti, Údržba a opravy","hodnota":"Že nemusím nic řešit, Rychlé řešení problémů","cena":"do 3000 Kč","email":"RH@RH.patek","vzkaz":"","score":5,"segment":"warm"},{"datum":"2026-03-24","typ":"Rodinný dům","zajem":"Ano, dává to smysl","problemy":"Shánění spolehlivých řemeslníků, Hlídání revizí a servisů, Úklid / provoz domácnosti","hodnota":"Že nemusím nic řešit, Jeden spolehlivý partner na vše, Automatické hlídání (revize, servis), Rychlé řešení problémů, Přehled/report o stavu domu","cena":"3 000-5 000 Kč","email":"michalkrouzil@hotmail.cz","vzkaz":"","score":10,"segment":"hot"}]};
+
+// Deduplicate by email+datum
+const seen = new Set();
+const leads = DATA.leads.filter(l => {
+  const key = l.datum + '|' + (l.email || Math.random());
+  if (l.email && seen.has(key)) return false;
+  if (l.email) seen.add(key);
+  return true;
+});
+
+const SEG = {
+  hot: { label: '🔥 Horký lead', akce: 'Zavolat do 24h', cls: 'hot' },
+  warm: { label: '⚡ Sledovat', akce: 'Poslat info email', cls: 'warm' },
+  cold: { label: '❄️ Potenciál', akce: 'Newsletter', cls: 'cold' },
+  no: { label: '✗ Nevhodný', akce: 'Ignorovat', cls: 'no' },
+};
+
+function sdCls(s) { return { hot:'sd-hot', warm:'sd-warm', cold:'sd-warm', no:'sd-no' }[s] || 'sd-no'; }
+function bCls(s) { return { hot:'b-hot', warm:'b-warm', cold:'b-warm', no:'b-no' }[s] || 'b-no'; }
+
+// Stats
+const total = leads.length;
+const hot = leads.filter(l => l.segment === 'hot').length;
+const warm = leads.filter(l => l.segment === 'warm').length;
+const withEmail = leads.filter(l => l.email && l.email.includes('@')).length;
+const ano = leads.filter(l => l.zajem.includes('Ano')).length;
+const mozna = leads.filter(l => l.zajem.includes('Možná')).length;
+const ne = leads.filter(l => l.zajem.includes('Ne')).length;
+const vzkazyLeads = leads.filter(l => l.vzkaz && l.vzkaz.trim().length > 3);
+const avgScore = (leads.reduce((a, l) => a + l.score, 0) / total).toFixed(1);
+
+// Count problems & values
+function countItems(arr) {
+  const c = {};
+  arr.forEach(l => {
+    const field = l.problemy || l.hodnota || '';
+    if (!field || field === 'nan') return;
+    field.split(',').forEach(x => {
+      const t = x.trim();
+      if (t) c[t] = (c[t] || 0) + 1;
+    });
+  });
+  return Object.entries(c).sort((a,b) => b[1]-a[1]);
+}
+function countProblems() {
+  const c = {};
+  leads.forEach(l => {
+    if (!l.problemy || l.problemy === 'nan') return;
+    l.problemy.split(',').forEach(x => { const t = x.trim(); if (t) c[t] = (c[t]||0)+1; });
+  });
+  return Object.entries(c).sort((a,b) => b[1]-a[1]);
+}
+function countValues() {
+  const c = {};
+  leads.forEach(l => {
+    if (!l.hodnota || l.hodnota === 'nan') return;
+    l.hodnota.split(',').forEach(x => { const t = x.trim(); if (t) c[t] = (c[t]||0)+1; });
+  });
+  return Object.entries(c).sort((a,b) => b[1]-a[1]);
+}
+function countCena() {
+  const c = {};
+  leads.forEach(l => { if (l.cena && l.cena !== 'nan') c[l.cena] = (c[l.cena]||0)+1; });
+  return Object.entries(c).sort((a,b) => b[1]-a[1]);
+}
+
+// ════ TAB ════
+function switchTab(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ════ MODAL ════
+function openVzkazModal() {
+  const mc = document.getElementById('modalContent');
+  document.getElementById('modalSub').textContent = vzkazyLeads.length + ' vzkaz' + (vzkazyLeads.length > 1 ? 'ů' : '') + ' od respondentů';
+  mc.innerHTML = vzkazyLeads.map(l => `
+    <div class="modal-vzkaz-item">
+      <div class="modal-vzkaz-meta">${l.datum} · ${l.typ} · ${l.zajem}</div>
+      <div class="modal-vzkaz-text">"${l.vzkaz}"</div>
+    </div>
+  `).join('');
+  document.getElementById('vzkazModal').classList.add('open');
+}
+function closeModal(e) {
+  if (e.target.id === 'vzkazModal') document.getElementById('vzkazModal').classList.remove('open');
+}
+
+// ════ RENDER DASHBOARD ════
+function renderDashboard() {
+  document.getElementById('headerMeta').innerHTML = `${total} respondentů · aktualizováno ${leads[leads.length-1]?.datum || ''}`;
+
+  // Vzkazy banner
+  if (vzkazyLeads.length > 0) {
+    document.getElementById('vzkazBanner').style.display = 'block';
+    document.getElementById('vzkazCount').textContent = vzkazyLeads.length;
+    // update tab
+    document.getElementById('vzkazTab').textContent = `💬 Vzkazy (${vzkazyLeads.length})`;
+  }
+
+  // KPIs
+  const kpis = [
+    { val: total, label: 'Respondentů', cls: '' },
+    { val: hot, label: '🔥 Horké leady', cls: 'kc-hot' },
+    { val: warm, label: '⚡ Sledovat', cls: 'kc-warm' },
+    { val: Math.round(ano/total*100)+'%', label: 'Zájem: ANO', cls: 'kc-gold' },
+    { val: withEmail, label: 'Zanechalo email', cls: 'kc-blue' },
+    { val: avgScore, label: 'Prům. skóre', cls: '' },
+  ];
+  document.getElementById('kpiGrid').innerHTML = kpis.map(k =>
+    `<div class="kpi ${k.cls}"><div class="kpi-val">${k.val}</div><div class="kpi-label">${k.label}</div></div>`
+  ).join('');
+
+  // Zájem chart
+  const zajemData = [
+    { label: 'Ano, dává to smysl', val: ano, cls: 'dot-green' },
+    { label: 'Možná', val: mozna, cls: 'dot-yellow' },
+    { label: 'Ne', val: ne, cls: 'dot-red' },
+  ];
+  document.getElementById('zajemChart').innerHTML = zajemData.map(r =>
+    `<div class="pie-row"><div class="dot ${r.cls}"></div><div class="pie-label">${r.label}</div>
+    <div class="pie-val">${r.val}</div><div class="pie-pct">${Math.round(r.val/total*100)}%</div></div>`
+  ).join('');
+
+  // Problems
+  const probs = countProblems().slice(0, 5);
+  const maxP = probs[0]?.[1] || 1;
+  document.getElementById('problemsChart').innerHTML = probs.map(([label, cnt]) =>
+    `<div class="bar-row"><div class="bar-label" title="${label}">${label}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/maxP*100)}%"></div></div>
+    <div class="bar-num">${cnt}</div></div>`
+  ).join('');
+
+  // Cena
+  const cenas = countCena();
+  const maxC = cenas[0]?.[1] || 1;
+  document.getElementById('cenaChart').innerHTML = cenas.map(([label, cnt]) =>
+    `<div class="bar-row"><div class="bar-label" title="${label}">${label}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/maxC*100)}%"></div></div>
+    <div class="bar-num">${cnt}</div></div>`
+  ).join('');
+
+  // Values
+  const vals = countValues().slice(0, 4);
+  document.getElementById('valuesGrid').innerHTML = vals.map(([label, cnt]) =>
+    `<div class="val-tile"><div class="val-tile-num">${cnt}</div><div class="val-tile-label">${label}</div></div>`
+  ).join('');
+
+  // Insights
+  const pctAnoMozna = Math.round((ano+mozna)/total*100);
+  document.getElementById('insZaver').innerHTML = `<strong>${pctAnoMozna}% respondentů</strong> projevilo zájem (ANO + MOŽNÁ). Messaging VOLKRO trefuje reálné potřeby.`;
+  const topCena = cenas[0]?.[0] || '';
+  document.getElementById('insPricing').innerHTML = `Pásmo <strong>${topCena}</strong> dominuje. Jeden respondent nabídl 5–10 000 Kč — premium tier existuje.`;
+  document.getElementById('insAkce').innerHTML = `Okamžitě oslovit <strong>${hot} horkých leadů</strong> se zanechaným emailem. Fokus: „klid + jeden partner na vše".`;
+
+  document.getElementById('trackerSub').textContent = `${total} respondentů · filtrováno podle segmentu`;
+}
+
+// ════ TABLE ════
+function renderTable(filter) {
+  const tbody = document.getElementById('tableBody');
+  const filtered = leads.filter(l => {
+    if (filter === 'all') return true;
+    if (filter === 'vzkaz') return l.vzkaz && l.vzkaz.trim().length > 3;
+    return l.segment === filter;
+  });
+  tbody.innerHTML = filtered.map(l => {
+    const seg = SEG[l.segment] || SEG.no;
+    const vzkazBtn = (l.vzkaz && l.vzkaz.trim().length > 3)
+      ? `<span class="vzkaz-pill" title="${l.vzkaz}">💬 vzkaz</span>` : '—';
+    return `<tr>
+      <td>${l.datum}</td>
+      <td>${l.typ}</td>
+      <td style="font-size:11px;">${l.zajem}</td>
+      <td style="max-width:180px;font-size:11px;">${l.problemy}</td>
+      <td style="white-space:nowrap;font-size:11px;">${l.cena}</td>
+      <td>${l.email ? `<a class="email-link" href="mailto:${l.email}">${l.email}</a>` : '<span style="color:#ccc">—</span>'}</td>
+      <td><span class="score-dot ${sdCls(l.segment)}">${l.score}</span></td>
+      <td><span class="badge ${bCls(l.segment)}">${seg.label}</span></td>
+      <td style="font-size:10px;color:#888;">${seg.akce}</td>
+      <td>${vzkazBtn}</td>
+    </tr>`;
+  }).join('');
+}
+function filterTable(seg, btn) {
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable(seg);
+}
+
+// ════ HOT CARDS ════
+function renderHotCards() {
+  const filtered = leads.filter(l => l.segment === 'hot' || l.segment === 'warm');
+  document.getElementById('hotGrid').innerHTML = filtered.map(l => {
+    const seg = SEG[l.segment] || SEG.no;
+    const emailHtml = l.email
+      ? `<div class="lcard-email"><a class="email-link" href="mailto:${l.email}">${l.email}</a></div>`
+      : `<div class="lcard-email" style="color:#bbb;font-style:italic;">email nezanechán</div>`;
+    const vzkazHtml = (l.vzkaz && l.vzkaz.trim().length > 3)
+      ? `<div class="lcard-vzkaz">"${l.vzkaz}"</div>` : '';
+    return `<div class="lcard ${l.segment}">
+      <div class="lcard-ghost-score">${l.score}</div>
+      <div class="lcard-seg ${l.segment}">${seg.label}</div>
+      ${emailHtml}
+      <div class="lcard-rows">
+        <b>Zájem:</b> ${l.zajem}<br>
+        <b>Problémy:</b> ${l.problemy}<br>
+        <b>Chce:</b> ${l.hodnota}<br>
+        <b>Cena:</b> ${l.cena}
+      </div>
+      ${vzkazHtml}
+      <div class="lcard-action">→ ${seg.akce}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════ VZKAZY PAGE ════
+function renderVzkazy() {
+  document.getElementById('vzkazySub').textContent = vzkazyLeads.length + ' respondentů zanechalo osobní vzkaz';
+  document.getElementById('vzkazCards').innerHTML = vzkazyLeads.map(l => {
+    const zajemCls = l.zajem.includes('Ano') ? 'ano' : l.zajem.includes('Možná') ? 'mozna' : 'ne';
+    return `<div class="vzk-card">
+      <div class="vzk-meta">
+        <span>${l.datum}</span>
+        <span>${l.typ}</span>
+        <span class="vzk-zajem ${zajemCls}">${l.zajem}</span>
+        ${l.email ? `<a class="email-link" href="mailto:${l.email}">${l.email}</a>` : ''}
+      </div>
+      <div class="vzk-text">${l.vzkaz}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════ INIT ════
+renderDashboard();
+renderTable('all');
+renderHotCards();
+renderVzkazy();
+</script>
+</body>
+</html>
